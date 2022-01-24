@@ -36,22 +36,41 @@ function lonlatFetch() {
 function kelvinToCelcius(kelvin) {
     return kelvin - 273.15;
 }
+
+// function generates forecast cards  
+var cardsGenerator = function() {
+    var card = document.createElement('div');
+    card.setAttribute('class', 'two');
+    forecastWeather.appendChild(card);
+    // select the div just created
+    var lastDiv = forecastWeather.lastElementChild;
+    // append ul
+    var ul = document.createElement('ul');
+    lastDiv.appendChild(ul);
+};
+
 // function generates corresponding button
 function createBtn() {
-    searchHistory.innerHTML = "";
     var createButton = document.createElement('input');
     createButton.setAttribute('class', 'button-primary');
     createButton.setAttribute('type', 'button');
     createButton.setAttribute('value', inputCity.value);
     searchHistory.appendChild(createButton);
     //reset input text
+
     inputCity.value = "";
+    console.log(searchHistory.innerHTML);
+    localStorage.removeItem('History-Btn');
+    localStorage.setItem('History-Btn', JSON.stringify(searchHistory.innerHTML));
+
+    // localStorage.setItem('History-Btn', JSON.stringify(searchHistory));
+    // var divs = localStorage.getItem('History-Btn');
+    // console.log('answer is', divs);
 };
 
 function clearBtn() {
     searchHistory.innerHTML = '<input class="button-primary" type="button" value="Search History">'
 };
-clearButton.addEventListener("click", clearBtn);
 
 // Function handles events when user click the submit button
 var submitButtonHandler = function() {
@@ -62,17 +81,16 @@ var submitButtonHandler = function() {
         .then(response => response.json())
         .then(function(data) {
 
-            // create a corresponding button
-            if (inputCity.value) {
-                createBtn();
-            };
-
-
             console.log('data is ', data);
             console.log('data is ', data['weather'][0]['icon']);
             // display corresponding result
             // city name display
             resultCity.innerHTML = data['name'];
+
+            if (inputCity.value) {
+                createBtn();
+            };
+
             // Unix convert to display format
             var dateString = moment.unix(data['dt']).format("DD/MM/YYYY");
             // current date
@@ -87,6 +105,7 @@ var submitButtonHandler = function() {
             currentWind.innerHTML = data['wind']['speed'] + ' m/sec';
             //Humidity display
             currentHumidity.innerHTML = data['main']['humidity'] + ' %';
+
             // local storage
             localStorage.setItem("main", JSON.stringify(data));
 
@@ -119,18 +138,6 @@ var submitButtonHandler = function() {
                     console.log('data is ', next5Day);
                     // reset forcast 
                     forecastWeather.innerHTML = '';
-
-                    // function generates forecast cards  
-                    var cardsGenerator = function() {
-                        var card = document.createElement('div');
-                        card.setAttribute('class', 'two');
-                        forecastWeather.appendChild(card);
-                        // select the div just created
-                        var lastDiv = forecastWeather.lastElementChild;
-                        // append ul
-                        var ul = document.createElement('ul');
-                        lastDiv.appendChild(ul);
-                    };
 
                     // generate loop
                     for (i = 0; i < next5Day.length; i++) {
@@ -173,30 +180,116 @@ var submitButtonHandler = function() {
                         lastCard.children[0].appendChild(li);
                         var forcastHumi = lastCard.children[0].children[4];
                         forcastHumi.innerHTML = 'Humidity:<br>' + next5Day[i]['humidity'] + ' %'
-                        console.log('target is ', );
                     }
-                    // local storage
-                    localStorage.setItem("onecall", JSON.stringify(onecallData));
+                    // clear old data
+                    localStorage.removeItem('onecall');
+                    // store local storage
+                    localStorage.setItem('onecall', JSON.stringify(onecallData));
                 })
-
-
 
         })
         // display error event if api fetched incorrectly
         .catch(error => alert('incorrect City Name'));
     // create a corresponding button
-    if (inputCity.value) {
-        createBtn();
-    };
+
 
 }
-
-submitButton.addEventListener("click", submitButtonHandler);
 
 function initialPage() {
-    var mainString = localStorage.getItem('main');
+    // var mainString = localStorage.getItem('main');
     var onecallString = localStorage.getItem('onecall');
+
+    if (onecallString) {
+        // retrive local storage into a object
+        var initialData = JSON.parse(onecallString);
+
+        // display corresponding result-
+
+        // city name display
+        resultCity.innerHTML = initialData['timezone'];
+        // Unix convert to display format
+        var dateString = moment.unix(initialData['current']['dt']).format("DD/MM/YYYY");
+        // current date
+        currentDate.innerHTML = dateString;
+        // weather Icon convert and display
+        var weatherCode = initialData['current']['weather'][0]['icon'];
+        var weatherUrl = `http://openweathermap.org/img/wn/${weatherCode}@2x.png`;
+        currentWeather.setAttribute("src", weatherUrl);
+        // temperture display ,only display one digit after integer
+        currentTemp.innerHTML = kelvinToCelcius(initialData['current']['temp']).toFixed(1) + '°C';
+        // wind speed display
+        currentWind.innerHTML = initialData['current']['wind_speed'] + ' m/sec';
+        //Humidity display
+        currentHumidity.innerHTML = initialData['current']['humidity'] + ' %';
+        //UV display -
+        var uv = initialData['current']['uvi'];
+        currentUV.innerHTML = uv;
+        if (uv < 4) {
+            currentUV.setAttribute('class', 'green')
+        }
+        if (uv >= 4 && uv <= 8) {
+            currentUV.setAttribute("class", "yellow");
+        }
+        if (uv > 9) {
+            currentUV.setAttribute("class", "red");
+        }
+
+        // 5 day forecast-
+        // Scrape a 5 Days forecast array 
+        var next5Day = initialData['daily'].slice(1, 6);
+        console.log('data is ', next5Day);
+        // reset forcast 
+        forecastWeather.innerHTML = '';
+
+        for (i = 0; i < next5Day.length; i++) {
+            // create div + ul
+            cardsGenerator();
+
+            // select the ul just created
+            var lastCard = forecastWeather.children[i];
+
+            // forecast display-Date
+            var forecastDate = moment.unix(next5Day[i]['dt']).format("DD/MM/YYYY");
+            lastCard.children[0].innerHTML = "<li><span>" + forecastDate + "</span></li>";
+
+            // forecast Weather Icon
+            // scrape icon code
+            var forcastWeatherCode = next5Day[i]['weather'][0]['icon'];
+            var forecastIconUrl = `http://openweathermap.org/img/wn/${forcastWeatherCode}@2x.png`;
+            // create li for icon
+            var li = document.createElement('li');
+            lastCard.children[0].appendChild(li);
+            var forcastWeather = lastCard.children[0].children[1];
+            // insert img
+            var img = document.createElement('img');
+            forcastWeather.appendChild(img);
+            forcastWeather.children[0].setAttribute("src", forecastIconUrl);
+            // forecast Temperture
+            var li = document.createElement('li');
+            lastCard.children[0].appendChild(li);
+            var forcastTemp = lastCard.children[0].children[2];
+            forcastTemp.innerHTML =
+                'Temp:<br>' + kelvinToCelcius(next5Day[i]['temp']['min']).toFixed(1) + ' ~ ' +
+                kelvinToCelcius(next5Day[i]['temp']['max']).toFixed(1) + ' °C';
+            // forecast Wind Speed
+            var li = document.createElement('li');
+            lastCard.children[0].appendChild(li);
+            var forcastWind = lastCard.children[0].children[3];
+            forcastWind.innerHTML = 'WindSpeed:<br>' + next5Day[i]['wind_speed'] + ' m/sec';
+            // forecast Humidity
+            var li = document.createElement('li');
+            lastCard.children[0].appendChild(li);
+            var forcastHumi = lastCard.children[0].children[4];
+            forcastHumi.innerHTML = 'Humidity:<br>' + next5Day[i]['humidity'] + ' %'
+
+        }
+    }
 }
+
+initialPage();
+submitButton.addEventListener("click", submitButtonHandler);
+clearButton.addEventListener("click", clearBtn);
+
 
 // Search History button event
 // add corresponding(data['name']) button when click on the button-
