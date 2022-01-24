@@ -2,17 +2,13 @@ body {
     font-family: 'Press Start 2P', sans-serif;
     font-size: 16px;
     box-sizing: border-box;
+    text-align: center
 }
 
-.container h1,
-.container p,
-h5 {
-    text-align: center;
-}
 
-div {
+/* div {
     border: 1px solid black;
-}
+} */
 
 .row {
     display: flex;
@@ -20,15 +16,77 @@ div {
     align-items: center;
 }
 
-#search-box {
-    margin-left: 5%;
+
+/* search box */
+
+body .container {
+    margin-top: 2.5rem;
+    padding-top: 15px;
+    border: 4px solid black;
+    border-radius: 15px;
 }
 
-.four {
+body .container .lead {
+    color: rgba(40, 88, 67, 0.877);
+}
+
+#search-box {
+    margin-left: 5%;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+}
+
+label {
+    margin-bottom: 10px;
+}
+
+hr {
+    border: 2px solid black;
+    margin: 15px 0px;
+}
+
+#search-box .container {
+    border: 2px dashed rgba(40, 88, 67, 0.877);
+}
+
+#search-history input {
+    width: 90%;
+    padding: 0px;
+}
+
+
+/* Today's Weather Box */
+
+#result-box {
+    border: 2px dashed rgba(40, 88, 67, 0.877);
+    border-radius: 15px;
+    margin: 2%;
+    margin-top: 0%;
+    padding-top: 2%;
+}
+
+#result-city,
+.twelve h5 {
+    background-color: cadetblue;
+    border-radius: 8px;
+    padding: 5px 0;
+}
+
+.twelve h5 {
+    background-color: rgb(141, 202, 204);
+}
+
+.twelve h5 span {
+    background-color: rgba(255, 255, 255, 0.801);
+    border-radius: 8px;
+    padding: 7.5px 10px;
+}
+
+#span-current-uv {
+    padding: 10px;
+    border-radius: 8px;
 }
 
 
@@ -46,9 +104,18 @@ div {
     background-color: rgb(216, 191, 52);
 }
 
+
+/* Forecast Box */
+
+#forcast-box {
+    padding-top: 0;
+}
+
 #forcast-box header {
     display: flex;
     justify-content: center;
+    background-color: cadetblue;
+    border-radius: 8px;
 }
 
 .row ul {
@@ -60,6 +127,14 @@ div {
 
 .two {
     width: 20%;
+    border: 2px dashed rgba(40, 88, 67, 0.877);
+    border-radius: 8px;
+    margin: 0.5%;
+}
+
+.two ul li:first-child {
+    background-color: rgb(141, 202, 204);
+    border-radius: 8px;
 }
 
 li {
